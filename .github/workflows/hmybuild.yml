@@ -32,21 +32,17 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-#      - name: Checkout dependence repo
-#        uses: actions/checkout@v2
-#        with:
-#          repository: harmony-one/mcl
-#          path: go/src/github.com/harmony-one/mcl
-#        env:
-#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
-#
-#      - name: Checkout dependence repo
-#        uses: actions/checkout@v2
-#        with:
-#          repository: harmony-one/bls
-#          path: go/src/github.com/harmony-one/bls
-#        env:
-#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+      - name: Checkout dependence repo
+        uses: actions/checkout@v2
+        with:
+          repository: harmony-one/mcl
+          path: mcl
+
+      - name: Checkout dependence repo
+        uses: actions/checkout@v2
+        with:
+          repository: harmony-one/bls
+          path: bls
 #
 #      - name: Checkout dependence code
 #        uses: actions/checkout@v2
