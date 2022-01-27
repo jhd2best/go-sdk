@@ -71,6 +71,7 @@ jobs:
         run: |
           pwd
           echo "GOPATH=$GOPATH"
+          go env GOPATH
           ls $HOME/go/src/github.com/harmony-one
           make static
           ls -a dist
