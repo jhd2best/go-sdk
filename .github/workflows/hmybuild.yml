@@ -78,6 +78,9 @@ jobs:
       - name: Build hmy binary for MacOS
         if: matrix.os == 'macos-10.15'
         run: |
+          brew install bash
+          sudo rm -f /usr/local/opt/openssl
+          sudo ln -sf /usr/local/opt/openssl@1.1 /usr/local/opt/openssl
           make all
           mv dist/hmy dist/hmy-darwin
         working-directory: go-sdk
