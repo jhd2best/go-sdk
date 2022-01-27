@@ -36,19 +36,19 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: harmony-one/mcl
-          path: ${HOME}/go/src/github.com/harmony-one/mcl
+          path: $HOME/go/src/github.com/harmony-one/mcl
 
       - name: Checkout dependence repo
         uses: actions/checkout@v2
         with:
           repository: harmony-one/bls
-          path: ${HOME}/go/src/github.com/harmony-one/bls
+          path: $HOME/go/src/github.com/harmony-one/bls
 
       - name: Checkout dependence code
         uses: actions/checkout@v2
         with:
           repository: harmony-one/harmony
-          path: ${HOME}/go/src/github.com/harmony-one/harmony
+          path: $HOME/go/src/github.com/harmony-one/harmony
           ref: main
           fetch-depth: 0
 
@@ -70,7 +70,7 @@ jobs:
           ls -a dist
         working-directory: go-sdk
         env:
-          GOPATH: ${HOME}/go
+          GOPATH: $HOME/go
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
