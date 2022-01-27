@@ -66,13 +66,20 @@ jobs:
           echo "build_release=$RELEASE" >> $GITHUB_ENV
         working-directory: go-sdk
 
-      - name: Build hmy binary
-        # if: matrix.os == 'ubuntu-18.04'
+      - name: Build hmy binary for Linux
+        if: matrix.os == 'ubuntu-18.04'
         run: |
-          pwd
-          echo "GOPATH=$GOPATH"
           make static
-          ls -a dist
+          cp dist/hmy dist/hmy-amd64
+        working-directory: go-sdk
+        env:
+          GOPATH: ${{ env.go_path }}
+
+      - name: Build hmy binary for MacOS
+        if: matrix.os == 'macos-10.15'
+        run: |
+          make all
+          mv dist/hmy dist/hmy-darwin
         working-directory: go-sdk
         env:
           GOPATH: ${{ env.go_path }}
