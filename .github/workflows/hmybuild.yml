@@ -19,7 +19,7 @@ jobs:
 
       - name: Get GOPATH
         run: |
-          echo "go_path=GITHUB_WORKSPACE/go" >> $GITHUB_ENV
+          echo "go_path=$GITHUB_WORKSPACE/go" >> $GITHUB_ENV
 
       - name: Debug
         run: |
