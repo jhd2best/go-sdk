@@ -17,11 +17,6 @@ jobs:
         with:
           go-version: 1.16.5
 
-      - name: Checkout hmy code
-        uses: actions/checkout@v2
-        with:
-          path: go/src/github.com/harmony-one/go-sdk
-
       - name: Debug
         run: |
           pwd
@@ -29,34 +24,39 @@ jobs:
           echo ${GITHUB_WORKSPACE}
           echo ${GOPATH}
           echo ${GOROOT}
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
 
-      - name: Checkout dependence repo
+      - name: Checkout hmy code
         uses: actions/checkout@v2
         with:
-          repository: harmony-one/mcl
-          path: go/src/github.com/harmony-one/mcl
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
-
-      - name: Checkout dependence repo
-        uses: actions/checkout@v2
-        with:
-          repository: harmony-one/bls
-          path: go/src/github.com/harmony-one/bls
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
-
-      - name: Checkout dependence code
-        uses: actions/checkout@v2
-        with:
-          repository: harmony-one/harmony
-          path: go/src/github.com/harmony-one/harmony
+          path: go-sdk
           ref: ${{ github.ref }}
           fetch-depth: 0
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+
+#      - name: Checkout dependence repo
+#        uses: actions/checkout@v2
+#        with:
+#          repository: harmony-one/mcl
+#          path: go/src/github.com/harmony-one/mcl
+#        env:
+#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+#
+#      - name: Checkout dependence repo
+#        uses: actions/checkout@v2
+#        with:
+#          repository: harmony-one/bls
+#          path: go/src/github.com/harmony-one/bls
+#        env:
+#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+#
+#      - name: Checkout dependence code
+#        uses: actions/checkout@v2
+#        with:
+#          repository: harmony-one/harmony
+#          path: go/src/github.com/harmony-one/harmony
+#          ref: ${{ github.ref }}
+#          fetch-depth: 0
+#        env:
+#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
 
       - name: Get latest version and release
         run: |
@@ -64,27 +64,21 @@ jobs:
           RELEASE=$(git describe --long | cut -f2 -d-)
           echo "build_version=$VERSION" >> $GITHUB_ENV
           echo "build_release=$RELEASE" >> $GITHUB_ENV
-        working-directory: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+        working-directory: go-sdk
 
       - name: Build hmy binary
         # if: matrix.os == 'ubuntu-18.04'
         run: |
           make static
           ls -a dist
-        working-directory: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+        working-directory: go-sdk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: hmy
-          path: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk/dist/*
+          path: go-sdk/dist/*
           retention-days: 1
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
 
 
   # build-arm64:
