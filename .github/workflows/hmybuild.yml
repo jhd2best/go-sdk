@@ -2,25 +2,20 @@ name: release hmy
 
 on:
   push:
-    tags:
-      - v*
+    branches: ['master']
 
 jobs:
-
   build-x8664:
-    name: Build hmy binary for Linux x8664
+    name: Build hmy binary for Linux x86-64 and MacOS
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-18.04 ]
-
+        os: [ ubuntu-18.04, macos-10.15 ]
     steps:
-
       - name: Set up Go 1.16.5
         uses: actions/setup-go@v2
         with:
           go-version: 1.16.5
-
 
       - name: Checkout hmy code
         uses: actions/checkout@v2
@@ -58,13 +53,10 @@ jobs:
         with:
           repository: harmony-one/harmony
           path: go/src/github.com/harmony-one/harmony
-          ref: main
+          ref: ${{ github.ref }}
           fetch-depth: 0
         env:
           GOPATH: /home/runner/work/go-sdk/go-sdk/go
-
-
-
 
       - name: Get latest version and release
         run: |
@@ -76,10 +68,11 @@ jobs:
         env:
           GOPATH: /home/runner/work/go-sdk/go-sdk/go
 
-      - name: Build hmy binary for Linux
-        if: matrix.os == 'ubuntu-18.04'
+      - name: Build hmy binary
+        # if: matrix.os == 'ubuntu-18.04'
         run: |
           make static
+          ls -a dist
         working-directory: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk
         env:
           GOPATH: /home/runner/work/go-sdk/go-sdk/go
@@ -167,148 +160,140 @@ jobs:
   #       env:
   #         GOPATH: /home/ubuntu/actions-runner/_work/go-sdk/go-sdk/go
 
-  release-page:
-    name: Sign binary and create and publish release page
-    needs: [ build-x8664 ]
-    runs-on: ubuntu-18.04
+#  release-page:
+#    name: Sign binary and create and publish release page
+#    needs: [ build-x8664 ]
+#    runs-on: ubuntu-18.04
+#
+#    steps:
+#      - name: Import GPG key
+#        uses: crazy-max/ghaction-import-gpg@v3
+#        with:
+#          gpg-private-key: ${{ secrets.HMY_GPG_PRIVATE_KEY }}
+#          passphrase: ${{ secrets.HMY_GPG_PRIVATE_KEY_PASS }}
+#
+#      - name: Checkout hmy core code
+#        uses: actions/checkout@v2
+#        with:
+#          path: go/src/github.com/harmony-one/go-sdk
+#        env:
+#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+#
+#      - name: Get latest version
+#        run: |
+#          VERSION=$(git tag -l --sort=-v:refname | head -n 1 | tr -d v)
+#          VERSION_LONG=$(git describe --always --long --dirty)
+#          RELEASE=$(git describe --long | cut -f2 -d-)
+#          echo "build_version=$VERSION" >> $GITHUB_ENV
+#          echo "build_version_long=$VERSION_LONG" >> $GITHUB_ENV
+#          echo "build_release=$RELEASE" >> $GITHUB_ENV
+#        working-directory: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk
+#        env:
+#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+#
+#      - name: Download artifact
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: hmy
+#
+#      - name: Signed amd64 hmy binary
+#        run: |
+#          gpg --detach-sign hmy
+#          sha256sum hmy >> hmy.sha256
+#
+#      # - name: Download artifact
+#      #   uses: actions/download-artifact@v2
+#      #   with:
+#      #     name: hmy-arm64
+#
+#      # - name: Signed arm64 hmy binary
+#      #   run: |
+#      #     gpg --detach-sign hmy-arm64
+#      #     sha256sum hmy-arm64 >> hmy-arm64.sha256
+#
+#      - name: Get tag message
+#        env:
+#          TAG_SHA: ${{ github.event.after }}
+#          GOPATH: /home/runner/work/go-sdk/go
+#        run: |
+#          touch ./tag_message.md
+#          echo -e "$TAG_SHA\n\nThe released version: $build_version_long" >> ./tag_message.md
+#        working-directory: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk
+#
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: Mainnet Release ${{ env.build_version }}
+#          draft: true
+#          prerelease: false
+#          body_path: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk/tag_message.md
+#
+#      - name: Upload hmy binary for Linux (amd64)
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./hmy
+#          asset_name: hmy
+#          asset_content_type: application/octet-stream
+#
+#      - name: Upload sha256 signature of hmy amd64 binary
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./hmy.sha256
+#          asset_name: hmy.sha256
+#          asset_content_type: text/plain
+#
+#      - name: Upload gpg signature of hmy amd64 binary
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./hmy.sig
+#          asset_name: hmy.sig
+#          asset_content_type: application/octet-stream
 
-    steps:
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v3
-        with:
-          gpg-private-key: ${{ secrets.HMY_GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.HMY_GPG_PRIVATE_KEY_PASS }}
+          # - name: Upload hmy binary for ARM64
+          #   uses: actions/upload-release-asset@v1
+          #   env:
+          #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #     GOPATH: /home/runner/work/go-sdk/go-sdk/go
+          #   with:
+          #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+          #     asset_path: ./hmy-arm64
+          #     asset_name: hmy-arm64
+          #     asset_content_type: application/octet-stream
 
-      - name: Checkout hmy core code
-        uses: actions/checkout@v2
-        with:
-          path: go/src/github.com/harmony-one/go-sdk
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
+          # - name: Upload sha256 signature of hmy arm64 binary
+          #   uses: actions/upload-release-asset@v1
+          #   env:
+          #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #   with:
+          #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+          #     asset_path: ./hmy-arm64.sha256
+          #     asset_name: hmy-arm64.sha256
+          #     asset_content_type: text/plain
 
-
-      - name: Get latest version
-        run: |
-          VERSION=$(git tag -l --sort=-v:refname | head -n 1 | tr -d v)
-          VERSION_LONG=$(git describe --always --long --dirty)
-          RELEASE=$(git describe --long | cut -f2 -d-)
-          echo "build_version=$VERSION" >> $GITHUB_ENV
-          echo "build_version_long=$VERSION_LONG" >> $GITHUB_ENV
-          echo "build_release=$RELEASE" >> $GITHUB_ENV
-        working-directory: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk
-        env:
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
-
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: hmy
-
-      - name: Signed amd64 hmy binary
-        run: |
-          gpg --detach-sign hmy
-          sha256sum hmy >> hmy.sha256
-
-      # - name: Download artifact
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: hmy-arm64
-
-      # - name: Signed arm64 hmy binary
-      #   run: |
-      #     gpg --detach-sign hmy-arm64
-      #     sha256sum hmy-arm64 >> hmy-arm64.sha256
-
-
-
-      - name: Get tag message
-        env:
-          TAG_SHA: ${{ github.event.after }}
-          GOPATH: /home/runner/work/go-sdk/go
-        run: |
-          touch ./tag_message.md
-          echo -e "$TAG_SHA\n\nThe released version: $build_version_long" >> ./tag_message.md
-        working-directory: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk
-
-
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Mainnet Release ${{ env.build_version }}
-          draft: true
-          prerelease: false
-          body_path: /home/runner/work/go-sdk/go-sdk/go/src/github.com/harmony-one/go-sdk/tag_message.md
-
-
-
-      - name: Upload hmy binary for Linux (amd64)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GOPATH: /home/runner/work/go-sdk/go-sdk/go
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hmy
-          asset_name: hmy
-          asset_content_type: application/octet-stream
-
-      - name: Upload sha256 signature of hmy amd64 binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hmy.sha256
-          asset_name: hmy.sha256
-          asset_content_type: text/plain
-
-      - name: Upload gpg signature of hmy amd64 binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hmy.sig
-          asset_name: hmy.sig
-          asset_content_type: application/octet-stream
-
-
-      # - name: Upload hmy binary for ARM64
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     GOPATH: /home/runner/work/go-sdk/go-sdk/go
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./hmy-arm64
-      #     asset_name: hmy-arm64
-      #     asset_content_type: application/octet-stream
-
-      # - name: Upload sha256 signature of hmy arm64 binary
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./hmy-arm64.sha256
-      #     asset_name: hmy-arm64.sha256
-      #     asset_content_type: text/plain
-
-      # - name: Upload gpg signature of hmy arm64 binary
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./hmy-arm64.sig
-      #     asset_name: hmy-arm64.sig
-      #     asset_content_type: application/octet-stream
+          # - name: Upload gpg signature of hmy arm64 binary
+          #   uses: actions/upload-release-asset@v1
+          #   env:
+          #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #   with:
+          #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+          #     asset_path: ./hmy-arm64.sig
+          #     asset_name: hmy-arm64.sig
+          #     asset_content_type: application/octet-stream
 
           
         
