@@ -19,7 +19,7 @@ jobs:
 
       - name: Get GOPATH
         run: |
-          echo "go_path=$HOME/go" >> $GITHUB_ENV
+          echo "go_path=GITHUB_WORKSPACE/go" >> $GITHUB_ENV
 
       - name: Debug
         run: |
@@ -28,6 +28,8 @@ jobs:
           echo ${GITHUB_WORKSPACE}
           echo ${GOPATH}
           echo ${GOROOT}
+        env:
+          GOPATH: ${{ env.go_path }}
 
       - name: Checkout hmy code
         uses: actions/checkout@v2
