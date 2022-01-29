@@ -78,6 +78,8 @@ jobs:
       - name: DEBUG Build hmy binary for MacOS
         if: matrix.os == 'macos-10.15'
         run: |
+          make -C $GOPATH/src/github.com/harmony-one/mcl -j8
+          make -C $GOPATH/src/github.com/harmony-one/bls BLS_SWAP_G=1 -j8
           ls $GOPATH/src/github.com/harmony-one/bls/lib
           ls $GOPATH/src/github.com/harmony-one/mcl/lib
           source $GOPATH/src/github.com/harmony-one/harmony/scripts/setup_bls_build_flags.sh -v
