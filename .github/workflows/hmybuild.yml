@@ -75,7 +75,7 @@ jobs:
         env:
           GOPATH: ${{ env.go_path }}
 
-      - name: [DEBUG] Build hmy binary for MacOS
+      - name: DEBUG Build hmy binary for MacOS
         if: matrix.os == 'macos-10.15'
         run: |
           ls $GOPATH/src/github.com/harmony-one/bls/lib
