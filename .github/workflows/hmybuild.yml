@@ -75,17 +75,17 @@ jobs:
         env:
           GOPATH: ${{ env.go_path }}
 
-      - name: DEBUG Build hmy binary for MacOS
-        if: matrix.os == 'macos-10.15'
-        run: |
-          make -C $GOPATH/src/github.com/harmony-one/mcl -j8
-          make -C $GOPATH/src/github.com/harmony-one/bls BLS_SWAP_G=1 -j8
-          ls $GOPATH/src/github.com/harmony-one/bls/lib
-          ls $GOPATH/src/github.com/harmony-one/mcl/lib
-          source $GOPATH/src/github.com/harmony-one/harmony/scripts/setup_bls_build_flags.sh -v
-        working-directory: go-sdk
-        env:
-          GOPATH: ${{ env.go_path }}
+#      - name: DEBUG Build hmy binary for MacOS
+#        if: matrix.os == 'macos-10.15'
+#        run: |
+#          make -C $GOPATH/src/github.com/harmony-one/mcl -j8
+#          make -C $GOPATH/src/github.com/harmony-one/bls BLS_SWAP_G=1 -j8
+#          ls $GOPATH/src/github.com/harmony-one/bls/lib
+#          ls $GOPATH/src/github.com/harmony-one/mcl/lib
+#          source $GOPATH/src/github.com/harmony-one/harmony/scripts/setup_bls_build_flags.sh -v
+#        working-directory: go-sdk
+#        env:
+#          GOPATH: ${{ env.go_path }}
 
       - name: Build hmy binary for MacOS
         if: matrix.os == 'macos-10.15'
@@ -93,7 +93,7 @@ jobs:
           brew install bash
           sudo rm -f /usr/local/opt/openssl
           sudo ln -sf /usr/local/opt/openssl@1.1 /usr/local/opt/openssl
-          make all
+          make static
           mv dist/hmy dist/hmy-darwin
         working-directory: go-sdk
         env:
